@@ -18,7 +18,21 @@
 <style scoped>
 .app-container {
   min-height: 100vh;
-  background-image: radial-gradient(circle at 50% 0%, #1a1e18 0%, #050505 60%);
+  position: relative;
+}
+
+.app-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('./images/main/eftMain.jpg'), radial-gradient(circle at 50% 0%, #1a1e18 0%, #050505 60%);
+  background-size: cover;
+  background-position: center;
+  filter: sepia(0.5) opacity(0.85);
+  z-index: -1;
 }
 
 .app-header {
