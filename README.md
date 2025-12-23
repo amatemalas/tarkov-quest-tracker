@@ -1,6 +1,6 @@
-# Nuxt Minimal Starter
+# Tarkov Quest Tracker
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Tarkov Quest Tracker is a web application that allows players of the game "Escape from Tarkov" to track their quests and progress.
 
 ## Setup
 
