@@ -69,6 +69,42 @@ export const useTarkovData = () => {
 
   return {
     fetchMaps,
-    fetchQuestsByMap
+    fetchQuestsByMap,
+    fetchGlobalQuests: async () => {
+       const query = `
+      {
+        tasks(lang: en) {
+          id
+          name
+          wikiLink
+          map {
+            id
+            name
+            normalizedName
+          }
+          objectives {
+             id
+             type
+             description
+          }
+          trader {
+            name
+            imageLink
+          }
+        }
+      }`
+
+      try {
+        const response = await $fetch<any>(GRAPHQL_ENDPOINT, {
+          method: 'POST',
+          body: { query }
+        })
+        const tasks = response.data.tasks || []
+        return tasks.filter((task: any) => !task.map)
+      } catch (error) {
+        console.error('Error fetching global quests:', error)
+        return []
+      }
+    }
   }
 }
