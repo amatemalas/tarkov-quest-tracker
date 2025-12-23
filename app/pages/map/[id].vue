@@ -2,8 +2,11 @@
 const route = useRoute()
 const mapId = route.params.id as string
 
-const { fetchQuestsByMap, fetchMaps } = useTarkovData()
-const { data: quests, pending } = await useAsyncData(`quests-${mapId}`, () => fetchQuestsByMap(mapId))
+const { fetchQuestsByMap, fetchMaps, fetchGlobalQuests } = useTarkovData()
+const { data: quests, pending: pendingLocal } = await useAsyncData(`quests-${mapId}`, () => fetchQuestsByMap(mapId))
+const { data: globalQuests, pending: pendingGlobal } = await useAsyncData('quests-global', () => fetchGlobalQuests())
+
+const pending = computed(() => pendingLocal.value || pendingGlobal.value)
 
 // Retrieve map info for the state
 const { data: maps } = await useAsyncData('maps-detail', () => fetchMaps())
@@ -19,9 +22,17 @@ watchEffect(() => {
 })
 
 // Simple computed for available quests (not in itinerary)
+const searchQuery = ref('')
+const activeTab = ref<'local' | 'global'>('local')
+
 const availableQuests = computed(() => {
-  if (!quests.value) return []
-  return quests.value.filter((q: any) => !itinerary.value.find(i => i.id === q.id))
+  const source = activeTab.value === 'local' ? (quests.value || []) : (globalQuests.value || [])
+  
+  return source.filter((q: any) => {
+    const notInItinerary = !itinerary.value.find(i => i.id === q.id)
+    const matchesSearch = q.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    return notInItinerary && matchesSearch
+  })
 })
 
 useHead({
@@ -34,7 +45,7 @@ useHead({
 
 <template>
   <div class="page-map animate-entry">
-    <header class="map-header mb-8">
+    <header class="map-header">
       <NuxtLink to="/" class="back-link">&larr; BACK TO MAPS</NuxtLink>
       <div class="flex justify-between items-end mt-2">
         <h1 class="text-3xl font-bold">ACTIVE OPERATIONS: <span class="text-gold">{{ currentMapInfo?.name || '...' }}</span></h1>
@@ -51,7 +62,36 @@ useHead({
     <div v-else class="content-grid">
       <!-- Available Quests -->
       <section class="quest-list-section">
-        <h2 class="section-title">AVAILABLE QUESTS <span class="count">{{ availableQuests.length }}</span></h2>
+        <div class="tabs">
+          <button 
+            class="tab-btn" 
+            :class="{ active: activeTab === 'local' }"
+            @click="activeTab = 'local'"
+          >
+            LOCAL OPS
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ active: activeTab === 'global' }"
+            @click="activeTab = 'global'"
+          >
+            GLOBAL / ANY
+          </button>
+        </div>
+
+        <h2 class="section-title">
+          {{ activeTab === 'local' ? 'ZONE OBJECTIVES' : 'GLOBAL OBJECTIVES' }}
+          <span class="count">{{ availableQuests.length }}</span>
+        </h2>
+        
+        <div class="search-container">
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            placeholder="Search mission name..." 
+            class="search-input"
+          />
+        </div>
         
         <div class="quest-list">
           <div 
@@ -103,6 +143,10 @@ useHead({
 </template>
 
 <style scoped>
+.map-header {
+  margin-bottom: var(--space-lg);
+}
+
 .back-link {
   color: var(--primary-gold);
   text-decoration: none;
@@ -302,5 +346,67 @@ useHead({
 }
 .remove-btn:hover {
   color: var(--accent-red);
+}
+
+.search-container {
+  margin-bottom: var(--space-md);
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+  margin-bottom: var(--space-md);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+.tab-btn.active {
+  background: var(--bg-card);
+  color: var(--primary-gold);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: var(--primary-gold);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
 }
 </style>
