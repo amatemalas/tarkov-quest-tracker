@@ -20,7 +20,7 @@ const selectMap = async (map: any) => {
 }
 
 const getMapImage = (map: any) => {
-  return `https://assets.tarkov.dev/maps/${map.normalizedName}.jpg`
+  return `https://cdn.mapgenie.io/images/games/tarkov/maps/${map.normalizedName}.jpg`
 }
 
 useHead({
