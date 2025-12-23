@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import favicon from '~/assets/images/favicon.ico'
+import favicon16 from '~/assets/images/favicon-16x16.png'
+import favicon32 from '~/assets/images/favicon-32x32.png'
+
+useHead({
+  link: [
+    { rel: 'shortcut icon', type: 'image/x-icon', href: favicon },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', href: favicon16 },
+    { rel: 'icon', type: 'image/png', sizes: '32x32', href: favicon32 }
+  ]
+})
+</script>
+
 <template>
   <div class="app-container">
     <header class="app-header glass-panel">

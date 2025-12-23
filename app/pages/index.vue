@@ -109,7 +109,11 @@ useHead({
   background-color: #1a1a1a; /* Fallback */
   background-size: cover;
   background-position: center;
+  background-clip: padding-box; /* Prevent bleeding under border */
   cursor: pointer;
+  /* Fix for Safari border-radius clipping */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
 }
 
 .map-card:hover {
